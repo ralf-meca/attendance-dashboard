@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '@/views/LoginPage.vue'
 import { useAuthStore } from '@/stores/authStore.ts'
+import MainLayout from '@/layouts/MainLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,12 +10,19 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: LoginPage,
+      meta: { requiresAuth: false }
     },
     {
       path: '/',
-      name: 'Dashboard',
-      component: () => import('../views/DashboardPage.vue'),
+      component: MainLayout,  // Layout as parent route
       meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          name: 'Dashboard',
+          component: () => import('../views/DashboardPage.vue'),
+        },
+      ]
     },
   ],
 })

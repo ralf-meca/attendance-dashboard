@@ -1,92 +1,36 @@
 <template>
-  <div class="main-app">
-    <header class="app-header">
-      <h1>CRM Dashboard</h1>
-      <button @click="handleLogout" class="logout-button">
-        Logout
-      </button>
-    </header>
-    <main class="app-content">
-      <div class="welcome-card">
-        <h2>Welcome to your CRM!</h2>
-        <p>You are successfully authenticated.</p>
-        <div class="token-info">
-          <strong>Token (first 50 chars):</strong>
-          <code>{{ tokenPreview }}</code>
-        </div>
-        <p class="info-text">
-          You can now add your actual application components here.
-          The authentication is handled automatically, and the token
-          is stored in localStorage for persistence across sessions.
-        </p>
+  <MainLayout title="Attendance Dashboard">
+    <div class="welcome-card">
+      <h2>Welcome {{ userContact?.firstName }}!</h2>
+      <p>You are successfully authenticated.</p>
+      <div class="token-info">
+        <strong>Token (first 50 chars):</strong>
+        <code>{{ tokenPreview }}</code>
       </div>
-    </main>
-  </div>
+      <p class="info-text">
+        You can now add your actual application components here.
+        The authentication is handled automatically, and the token
+        is stored in localStorage for persistence across sessions.
+      </p>
+    </div>
+  </MainLayout>
 </template>
 
-<script setup  lang="ts">
+<script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore.ts'
+import { useAuthStore } from '@/stores/authStore'
+import MainLayout from '@/layouts/MainLayout.vue'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const tokenPreview = computed(() => {
   return authStore.token ? `${authStore.token.substring(0, 50)}...` : ''
 })
 
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/login')
-}
+const userContact = computed(() => authStore.userContact)
 </script>
 
 <style scoped>
-.main-app {
-  min-height: 100vh;
-  background: #f5f7fa;
-}
-
-.app-header {
-  background: white;
-  padding: 20px 40px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.app-header h1 {
-  font-size: 24px;
-  color: #333;
-  font-weight: 600;
-}
-
-.logout-button {
-  padding: 10px 24px;
-  background: #fff;
-  color: var(--vt-c-indigo);
-  border: 2px solid var(--vt-c-indigo);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.logout-button:hover {
-  background: var(--vt-c-indigo);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.app-content {
-  padding: 40px;
-  margin: 0 auto;
-}
-
 .welcome-card {
   background: white;
   border-radius: 12px;
@@ -137,5 +81,3 @@ const handleLogout = () => {
   font-style: italic;
 }
 </style>
-
-

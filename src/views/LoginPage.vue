@@ -1,3 +1,28 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useAuthStore } from '../stores/authStore'
+import { useToast } from "primevue/usetoast";
+const toast = useToast();
+
+const authStore = useAuthStore()
+const username = ref('')
+const password = ref('')
+const errorMessage = ref('')
+
+const handleLogin = async () => {
+  errorMessage.value = ''
+
+  try {
+    await authStore.login(username.value, password.value).then(response => {
+      toast.add({ severity: 'info', summary: 'Info', detail: response?.error, life: 3000 });
+    })
+  } catch {
+    errorMessage.value = 'Invalid username or password. Please try again.'
+  }
+}
+</script>
+
+
 <template>
   <div class="login-container">
     <div class="login-card">
@@ -45,26 +70,6 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import { useAuthStore } from '../stores/authStore'
-
-const authStore = useAuthStore()
-const username = ref('')
-const password = ref('')
-const errorMessage = ref('')
-
-const handleLogin = async () => {
-  errorMessage.value = ''
-
-  try {
-    await authStore.login(username.value, password.value)
-  } catch {
-    errorMessage.value = 'Invalid username or password. Please try again.'
-  }
-}
-</script>
-
 <style scoped>
 .login-container {
   display: flex;
@@ -80,7 +85,7 @@ const handleLogin = async () => {
   border-radius: 12px;
   padding: 40px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  max-width: 420px;
+  min-width: 28rem;
 }
 
 .login-card h1 {

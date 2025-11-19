@@ -1,31 +1,21 @@
 import { defineStore } from 'pinia'
 import router from '@/router'
-
-interface AuthState {
-  token: string | null
-  isLoading: boolean
-  error: string | null
-}
-
-interface LoginResponse {
-  isSuccess: boolean
-  token: string
-  data: unknown
-}
+import type { AuthState, Contact, LoginResponse } from './auth.types'
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     token: localStorage.getItem('authToken') || null,
     isLoading: false,
-    error: null
+    error: null,
+    userContact: JSON.parse(localStorage.getItem('userContact') || 'null'),
   }),
 
   getters: {
-    isAuthenticated: (state): boolean => !!state.token
+    isAuthenticated: (state): boolean => !!state.token,
   },
 
   actions: {
-    async login(username: string, password: string): Promise<void> {
+    async login(username: string, password: string): Promise<{ success: boolean; error?: string }> {
       this.isLoading = true
       this.error = null
 
@@ -39,7 +29,7 @@ export const useAuthStore = defineStore('auth', {
         })
 
         if (!response.ok) {
-          throw new Error('Login failed')
+          return { success: false, error: 'Login failed' }
         }
 
         const data: LoginResponse = await response.json()
@@ -47,12 +37,18 @@ export const useAuthStore = defineStore('auth', {
         if (data.isSuccess && data.token) {
           this.token = data.token
           localStorage.setItem('authToken', data.token)
+          await this.fetchUserContact(username, data.token).then(async (result) => {
+            if (!result.success) {
+              await router.push('/')
+              return { success: true, message: `Contact fetch failed: ${ result.error || 'Unknown error' }` }
+            }
+          })
           await router.push('/')
+          return { success: true }
         } else {
-          throw new Error('Invalid credentials')
+          return { success: false, error: 'Invalid credentials' }
         }
       } catch (error) {
-
         this.error = error instanceof Error ? error.message : 'An error occurred'
         throw error
       } finally {
@@ -60,9 +56,46 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async fetchUserContact(
+      email: string,
+      token: string,
+    ): Promise<{ success: boolean; error?: string }> {
+      try {
+        const response = await fetch('https://crm.chweb.it/api/Contact/GetContactsAndProjects', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          return { success: false, error: 'Failed to fetch contacts' }
+        }
+
+        const contacts: Contact[] = await response.json()
+        const userContact = contacts.find((contact) => contact.email === email)
+
+        if (userContact) {
+          this.userContact = userContact
+          localStorage.setItem('userContact', JSON.stringify(userContact))
+          return { success: true }
+        } else {
+          return { success: false, error: 'No contact found matching the login email' }
+        }
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error occurred',
+        }
+      }
+    },
+
     logout(): void {
       this.token = null
+      this.userContact = null
       localStorage.removeItem('authToken')
-    }
-  }
+      localStorage.removeItem('userContact')
+    },
+  },
 })
