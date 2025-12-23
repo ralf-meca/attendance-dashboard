@@ -22,6 +22,11 @@ const router = createRouter({
           name: 'Dashboard',
           component: () => import('../views/DashboardPage.vue'),
         },
+        {
+          path: '',
+          name: 'About',
+          component: () => import('../views/DashboardPage.vue'),
+        },
       ]
     },
   ],

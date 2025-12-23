@@ -1,0 +1,72 @@
+.welcome-card {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-card h2 {
+  margin-bottom: 16px;
+  color: #333;
+  font-size: 28px;
+}
+
+.welcome-card h3 {
+  margin: 24px 0 16px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.welcome-card p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: #667eea;
+  font-size: 16px;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  border: 1px solid #fcc;
+}
+
+.token-info {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 24px 0;
+  border-left: 4px solid #667eea;
+}
+
+.token-info strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.token-info code {
+  display: block;
+  background: white;
+  padding: 12px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #667eea;
+  word-break: break-all;
+}
+
+.info-text {
+  font-size: 14px;
+  color: #888;
+  font-style: italic;
+}

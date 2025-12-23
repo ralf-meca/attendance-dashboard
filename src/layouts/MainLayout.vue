@@ -1,13 +1,11 @@
 <template>
   <div class="main-app">
     <header class="app-header">
-      <h1>{{ title }}</h1>
-      <button @click="handleLogout" class="logout-button">
-        Logout
-      </button>
+      <h1>{{ pageTitle }}</h1>
+      <button @click="handleLogout" class="logout-button">Logout</button>
     </header>
     <main class="app-content">
-      <slot />
+      <router-view />
     </main>
   </div>
 </template>
@@ -15,13 +13,18 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { computed } from 'vue'
 
 interface Props {
   title?: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   title: 'Attendance Dashboard'
+})
+
+const pageTitle = computed(() => {
+  return `${props.title} - ${authStore.userContact?.firstName} ${authStore.userContact?.lastName}`
 })
 
 const router = useRouter()
@@ -106,5 +109,4 @@ const handleLogout = () => {
   color: #667eea;
   word-break: break-all;
 }
-
 </style>
