@@ -3,6 +3,7 @@
   <div style="display: flex; justify-content: center; margin-top: 20px" v-if="isLoadingAttendance">
     <ProgressSpinner animationDuration="1s" style="color: black" />
   </div>
+
   <!-- Error state -->
   <div v-if="attendanceError" class="error-message">
     {{ attendanceError }}
@@ -18,8 +19,35 @@
         margin-bottom: 20px;
       "
     >
-      <DatePicker v-model="selectedDate" view="month" dateFormat="mm/yy" placeholder="Select a month" />
+      <div class="rate-selector">
+        <label for="month">Month</label>
+        <DatePicker
+          v-model="selectedDate"
+          view="month"
+          dateFormat="mm/yy"
+          placeholder="Select a month"
+        />
+      </div>
+      <div class="rate-section">
+        <div class="rate-selector">
+          <label for="rate-select">Rates</label>
+          <Select id="rate-select" v-model="selectedRate" :options="dayRates" />
+        </div>
+        <div class="total-amount">
+          <span class="total-label">Total to invoice:</span>
+          <strong class="total-value">{{ totalAmount }} €</strong>
+        </div>
+      </div>
     </div>
+
+    <!-- Stats Widgets -->
+    <StatsWidgets
+      :attendanceData="attendanceResponse"
+      :selectedDate="selectedDate"
+      :hoursWorkedThisMonth="hoursWorkedThisMonth"
+    />
+
+    <!-- Attendance Table -->
     <div class="welcome-card">
       <AttendanceTable
         :data="formattedAttendance"
@@ -27,8 +55,7 @@
         :error="attendanceError"
         :stripedRows="false"
         :paginator="!!formattedAttendance.length"
-      >
-      </AttendanceTable>
+      />
     </div>
   </div>
 </template>
@@ -41,14 +68,28 @@ import ProgressSpinner from 'primevue/progressspinner'
 import dayjs from 'dayjs'
 import AttendanceTable from '@/components/AttendanceTable.vue'
 import DatePicker from 'primevue/datepicker'
+import Select from 'primevue/select'
+import StatsWidgets from '@/components/StatsWidgets.vue'
 
 const authStore = useAuthStore()
-
 const userContact = computed(() => authStore.userContact)
+
+const userRates = computed(() => {
+  switch (userContact?.value?.email) {
+    case 'devis.kapaj@chweb.it':
+      return 50
+    case 'francesko.dhima@chweb.it':
+      return 100
+    case 'ralf.meca@chweb.it':
+      return 75
+
+    default:
+      return 75
+  }
+})
 
 // Attendance state
 const attendanceResponse = ref<AttendanceRecord[] | null>(null)
-
 const isLoadingAttendance = ref(false)
 const attendanceError = ref<string | null>(null)
 const selectedDate = ref<Date>(new Date())
@@ -92,7 +133,6 @@ const formattedAttendance = computed(() => {
   if (!attendanceResponse.value) return []
   const selectedMonth = dayjs(selectedDate.value).format('MM/YYYY')
 
-  console.log('selectedMonth', selectedMonth)
   return attendanceResponse.value
     .filter((entry) => {
       // Filter by selected month/year
@@ -107,13 +147,32 @@ const formattedAttendance = computed(() => {
       totalHours: entry.totalHours,
       workingType: entry.workingType,
     }))
+    .sort((a, b) => a.date > b.date ? 1 : -1)
 })
 
+const hoursWorkedThisMonth = computed(() => {
+  if (!formattedAttendance?.value) return 0
+
+  const totalHours = formattedAttendance.value.reduce((sum, entry) => {
+    return sum + (Number(entry.totalHours) || 0)
+  }, 0)
+
+  console.log('totalHours', totalHours)
+
+  return totalHours
+})
+
+const dayRates = [20, 30, 40, 50, 60, 75, 80, 100]
+const selectedRate = ref<number>(userRates.value)
+
+const totalAmount = computed(() => {
+  const amount = (hoursWorkedThisMonth.value / 8) * (selectedRate?.value ?? 0)
+  return new Intl.NumberFormat('de-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)
+})
 // Fetch on the component mount
 onMounted(() => {
   fetchAttendance()
 })
-
 </script>
 
 <style scoped src="./DashboardPage.css"></style>

@@ -40,6 +40,68 @@
   border: 1px solid #fcc;
 }
 
+.rate-section{
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.rate-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.rate-selector label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.rate-selector select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.total-amount {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  color: white;
+}
+
+.total-label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.total-value {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+@media (max-width: 768px) {
+  .rate-selector {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rate-selector select {
+    width: 100%;
+  }
+
+  .total-amount {
+    justify-content: center;
+  }
+}
+
 .token-info {
   background: #f8f9fa;
   padding: 16px;
