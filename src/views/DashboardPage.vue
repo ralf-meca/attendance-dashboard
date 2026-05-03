@@ -26,6 +26,7 @@
           view="month"
           dateFormat="mm/yy"
           placeholder="Select a month"
+          @update:modelValue="handleMonthChange"
         />
       </div>
       <div class="rate-section">
@@ -43,6 +44,7 @@
     <!-- Stats Widgets -->
     <StatsWidgets
       :attendanceData="attendanceResponse"
+      :doInnAttendanceData="doInnAttendanceResponse ?? []"
       :selectedDate="selectedDate"
       :hoursWorkedThisMonth="hoursWorkedThisMonth"
     />
@@ -63,7 +65,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
-import type { AttendanceRecord } from '@/types/attendance.types.ts'
+import type {
+  AttendanceRecord,
+  IDoInnAttendanceRecord,
+  IDoInnAttendanceResponse,
+} from '@/types/attendance.types.ts'
 import ProgressSpinner from 'primevue/progressspinner'
 import dayjs from 'dayjs'
 import AttendanceTable from '@/components/AttendanceTable.vue'
@@ -84,12 +90,13 @@ const userRates = computed(() => {
       return 75
 
     default:
-      return 75
+      return 100
   }
 })
 
 // Attendance state
 const attendanceResponse = ref<AttendanceRecord[] | null>(null)
+const doInnAttendanceResponse = ref<IDoInnAttendanceRecord[] | null>(null)
 const isLoadingAttendance = ref(false)
 const attendanceError = ref<string | null>(null)
 const selectedDate = ref<Date>(new Date())
@@ -121,6 +128,8 @@ const fetchAttendance = async () => {
     }
 
     attendanceResponse.value = (await response.json()) as AttendanceRecord[]
+
+    await fetchDoInnAttendance()
   } catch (error) {
     attendanceError.value = error instanceof Error ? error.message : 'Failed to fetch attendance'
     console.error('Error fetching attendance:', error)
@@ -147,19 +156,15 @@ const formattedAttendance = computed(() => {
       totalHours: entry.totalHours,
       workingType: entry.workingType,
     }))
-    .sort((a, b) => a.date > b.date ? 1 : -1)
+    .sort((a, b) => (a.date > b.date ? 1 : -1))
 })
 
 const hoursWorkedThisMonth = computed(() => {
   if (!formattedAttendance?.value) return 0
 
-  const totalHours = formattedAttendance.value.reduce((sum, entry) => {
+  return formattedAttendance.value.reduce((sum, entry) => {
     return sum + (Number(entry.totalHours) || 0)
   }, 0)
-
-  console.log('totalHours', totalHours)
-
-  return totalHours
 })
 
 const dayRates = [20, 30, 40, 50, 60, 75, 80, 100]
@@ -167,8 +172,33 @@ const selectedRate = ref<number>(userRates.value)
 
 const totalAmount = computed(() => {
   const amount = (hoursWorkedThisMonth.value / 8) * (selectedRate?.value ?? 0)
-  return new Intl.NumberFormat('de-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)
+  return new Intl.NumberFormat('de-CH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount)
 })
+const fetchDoInnAttendance = async () => {
+  const payloadDate = dayjs(selectedDate.value)
+  const doInnParams = new URLSearchParams({
+    mese: (payloadDate.month() + 1).toString(),
+    anno: payloadDate.year().toString(),
+    page: '1',
+    start: '0',
+    limit: '300',
+    _token: authStore.doInnToken ?? '',
+  })
+  const doInnResponse = await fetch(
+    `https://intranet.doinnovation.it/backend/rest/RND/attivita?${doInnParams}`,
+    { method: 'GET', credentials: 'include' },
+  )
+  const doInnData: IDoInnAttendanceResponse = await doInnResponse.json()
+  doInnAttendanceResponse.value = doInnData?.results?.data
+}
+
+const handleMonthChange = () => {
+  fetchDoInnAttendance()
+}
+
 // Fetch on the component mount
 onMounted(() => {
   fetchAttendance()

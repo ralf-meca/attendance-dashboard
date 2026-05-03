@@ -23,11 +23,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import dayjs from 'dayjs'
-import type { AttendanceRecord } from '@/types/attendance.types'
+import type { AttendanceRecord, IDoInnAttendanceRecord } from '@/types/attendance.types'
 import Chart from 'primevue/chart'
 
 interface Props {
   attendanceData: AttendanceRecord[] | null
+  doInnAttendanceData: IDoInnAttendanceRecord[] | null
   selectedDate: Date
   hoursWorkedThisMonth: number | null
 }
@@ -50,7 +51,7 @@ const getWorkingDaysInMonth = (date: Date) => {
   return workingDays
 }
 
-// Working days in selected month
+// Working days in the selected month
 const workingDaysThisMonth = computed(() => {
   return getWorkingDaysInMonth(props.selectedDate)
 })
@@ -121,22 +122,21 @@ const computedStats = computed(() => [
 ])
 
 const chartData = computed(() => {
-  const documentStyle = getComputedStyle(document.body)
+  const doInnTotal = props?.doInnAttendanceData?.[0]?.ore ? Number(props?.doInnAttendanceData?.[0]?.ore) / 8 : 0
+  const chwebTotal = daysWorkedThisMonth?.value - doInnTotal
 
   return {
-    labels: ['A', 'B', 'C'],
+    labels: ['Chweb', 'Way4Tech'],
     datasets: [
       {
-        data: [540, 325, 702],
+        data: [chwebTotal.toFixed(1), doInnTotal.toFixed(1)],
         backgroundColor: [
-          documentStyle.getPropertyValue('--p-cyan-500'),
-          documentStyle.getPropertyValue('--p-orange-500'),
-          documentStyle.getPropertyValue('--p-gray-500'),
+          "#fb3e3e",
+          "#5459df",
         ],
         hoverBackgroundColor: [
-          documentStyle.getPropertyValue('--p-cyan-400'),
-          documentStyle.getPropertyValue('--p-orange-400'),
-          documentStyle.getPropertyValue('--p-gray-400'),
+          "#fa5252",
+          "#3539b8",
         ],
       },
     ],
@@ -144,19 +144,19 @@ const chartData = computed(() => {
 })
 
 const chartOptions = computed(() => {
-  const documentStyle = getComputedStyle(document.documentElement);
-  const textColor = documentStyle.getPropertyValue('--p-text-color');
+  const documentStyle = getComputedStyle(document.documentElement)
+  const textColor = documentStyle.getPropertyValue('--p-text-color')
 
   return {
     plugins: {
       legend: {
         labels: {
           usePointStyle: true,
-          color: textColor
-        }
-      }
-    }
-  };
+          color: textColor,
+        },
+      },
+    },
+  }
 })
 </script>
 
@@ -209,7 +209,7 @@ const chartOptions = computed(() => {
   margin: 0 0 4px 0;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 .stat-value {

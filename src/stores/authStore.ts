@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import router from '@/router'
-import type { AuthState, Contact, LoginResponse } from './auth.types'
+import type { AuthState, Contact, IDoInnLoginResponse, LoginResponse } from './auth.types'
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     token: localStorage.getItem('authToken') || null,
+    doInnToken: localStorage.getItem('doInnToken') || null,
     isLoading: false,
     error: null,
     userContact: JSON.parse(localStorage.getItem('userContact') || 'null'),
@@ -37,6 +38,20 @@ export const useAuthStore = defineStore('auth', {
         if (data.isSuccess && data.token) {
           this.token = data.token
           localStorage.setItem('authToken', data.token)
+
+          const doInnResponse = await fetch('https://intranet.doinnovation.it/backend/rest/main/authentication/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: 'ralf.meca', password, persist: true }),
+            credentials: 'include',
+          })
+          if (doInnResponse.ok) {
+            const doInnData: IDoInnLoginResponse = await doInnResponse.json()
+            console.log('DoInn login response:', doInnData)
+            this.doInnToken = doInnData?.results?.data?.logintoken
+            localStorage.setItem('doInnToken', doInnData?.results?.data?.logintoken)
+          }
+
           await this.fetchUserContact(username, data.token).then(async (result) => {
             if (!result.success) {
               await router.push('/')
@@ -93,8 +108,10 @@ export const useAuthStore = defineStore('auth', {
 
     logout(): void {
       this.token = null
+      this.doInnToken = null
       this.userContact = null
       localStorage.removeItem('authToken')
+      localStorage.removeItem('doInnToken')
       localStorage.removeItem('userContact')
     },
   },
