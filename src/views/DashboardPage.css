@@ -132,3 +132,7 @@
   color: #888;
   font-style: italic;
 }
+
+:deep(.p-tabpanels) {
+  padding: 0;
+}

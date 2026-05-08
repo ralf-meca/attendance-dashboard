@@ -49,15 +49,32 @@
       :hoursWorkedThisMonth="hoursWorkedThisMonth"
     />
 
-    <!-- Attendance Table -->
+    <!-- Attendance Tables -->
     <div class="welcome-card">
-      <AttendanceTable
-        :data="formattedAttendance"
-        :isLoading="isLoadingAttendance"
-        :error="attendanceError"
-        :stripedRows="false"
-        :paginator="!!formattedAttendance.length"
-      />
+      <Tabs value="chweb">
+        <TabList>
+          <Tab value="chweb">Chweb</Tab>
+          <Tab value="way4tech">Way4Tech</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="chweb">
+            <AttendanceTable
+              :data="formattedAttendance"
+              :isLoading="isLoadingAttendance"
+              :error="attendanceError"
+              :stripedRows="false"
+              :paginator="!!formattedAttendance.length"
+            />
+          </TabPanel>
+          <TabPanel value="way4tech">
+            <DoInnAttendanceTable
+              :data="doInnAttendanceResponse ?? []"
+              :stripedRows="false"
+              :paginator="!!(doInnAttendanceResponse && doInnAttendanceResponse.length > 1)"
+            />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </div>
   </div>
 </template>
@@ -73,9 +90,15 @@ import type {
 import ProgressSpinner from 'primevue/progressspinner'
 import dayjs from 'dayjs'
 import AttendanceTable from '@/components/AttendanceTable.vue'
+import DoInnAttendanceTable from '@/components/DoInnAttendanceTable.vue'
 import DatePicker from 'primevue/datepicker'
 import Select from 'primevue/select'
 import StatsWidgets from '@/components/StatsWidgets.vue'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 
 const authStore = useAuthStore()
 const userContact = computed(() => authStore.userContact)

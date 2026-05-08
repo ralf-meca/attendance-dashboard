@@ -8,6 +8,8 @@ export interface IDoInnAttendanceRecord {
   data: string
   ore: string
   stato_dipendenza: string | null
+  created_at: string | null
+  updated_at: string | null
 }
 
 export interface IDoInnAttendanceResponse {
