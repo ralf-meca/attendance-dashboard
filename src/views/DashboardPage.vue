@@ -201,6 +201,8 @@ const totalAmount = computed(() => {
   }).format(amount)
 })
 const fetchDoInnAttendance = async () => {
+  if (!authStore.doInnToken) return
+
   const payloadDate = dayjs(selectedDate.value)
   const doInnParams = new URLSearchParams({
     mese: (payloadDate.month() + 1).toString(),

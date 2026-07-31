@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    async login(username: string, password: string): Promise<{ success: boolean; error?: string }> {
+    async login(username: string, password: string, includeWay4Tech: boolean = false): Promise<{ success: boolean; error?: string }> {
       this.isLoading = true
       this.error = null
 
@@ -39,17 +39,19 @@ export const useAuthStore = defineStore('auth', {
           this.token = data.token
           localStorage.setItem('authToken', data.token)
 
-          const doInnResponse = await fetch('https://intranet.doinnovation.it/backend/rest/main/authentication/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user: 'ralf.meca', password, persist: true }),
-            credentials: 'include',
-          })
-          if (doInnResponse.ok) {
-            const doInnData: IDoInnLoginResponse = await doInnResponse.json()
-            console.log('DoInn login response:', doInnData)
-            this.doInnToken = doInnData?.results?.data?.logintoken
-            localStorage.setItem('doInnToken', doInnData?.results?.data?.logintoken)
+          if (includeWay4Tech) {
+            const doInnResponse = await fetch('https://intranet.doinnovation.it/backend/rest/main/authentication/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ user: 'ralf.meca', password, persist: true }),
+              credentials: 'include',
+            })
+            if (doInnResponse.ok) {
+              const doInnData: IDoInnLoginResponse = await doInnResponse.json()
+              console.log('DoInn login response:', doInnData)
+              this.doInnToken = doInnData?.results?.data?.logintoken
+              localStorage.setItem('doInnToken', doInnData?.results?.data?.logintoken)
+            }
           }
 
           await this.fetchUserContact(username, data.token).then(async (result) => {

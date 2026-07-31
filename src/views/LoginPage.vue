@@ -2,18 +2,20 @@
 import { ref } from 'vue'
 import { useAuthStore } from '../stores/authStore'
 import { useToast } from "primevue/usetoast";
+import ToggleSwitch from 'primevue/toggleswitch'
 const toast = useToast();
 
 const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
 const errorMessage = ref('')
+const includeWay4Tech = ref(false)
 
 const handleLogin = async () => {
   errorMessage.value = ''
 
   try {
-    await authStore.login(username.value, password.value).then(response => {
+    await authStore.login(username.value, password.value, includeWay4Tech.value).then(response => {
       toast.add({ severity: 'info', summary: 'Info', detail: response?.error, life: 3000 });
     })
   } catch {
@@ -50,6 +52,15 @@ const handleLogin = async () => {
             type="password"
             placeholder="Enter your password"
             required
+            :disabled="authStore.isLoading"
+          />
+        </div>
+
+        <div class="form-group form-group-switch">
+          <label for="way4tech">Include Way4Tech</label>
+          <ToggleSwitch
+            id="way4tech"
+            v-model="includeWay4Tech"
             :disabled="authStore.isLoading"
           />
         </div>
@@ -111,6 +122,16 @@ const handleLogin = async () => {
   color: #333;
   font-size: 14px;
   font-weight: 500;
+}
+
+.form-group-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-group-switch label {
+  margin-bottom: 0;
 }
 
 .form-group input {
