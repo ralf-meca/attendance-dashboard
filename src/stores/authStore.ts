@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
 
       try {
-        const response = await fetch('https://crm.chweb.it/api/LoginApp', {
+        const response = await fetch('https://crm-chweb.tailb5010e.ts.net/api/LoginApp', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export const useAuthStore = defineStore('auth', {
       token: string,
     ): Promise<{ success: boolean; error?: string }> {
       try {
-        const response = await fetch('https://crm.chweb.it/api/Contact/GetContactsAndProjects', {
+        const response = await fetch('https://crm-chweb.tailb5010e.ts.net/api/Contact/GetContactsAndProjects', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
