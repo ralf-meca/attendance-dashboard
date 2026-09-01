@@ -136,7 +136,7 @@ const fetchAttendance = async () => {
 
   try {
     const response = await fetch(
-      `https://crm-chweb.tailb5010e.ts.net/api/Attendance/GetAttendanceByContactId?contactId=${userContact.value.id}`,
+      `/api/Attendance/GetAttendanceByContactId?contactId=${userContact.value.id}`,
       {
         method: 'GET',
         headers: {
