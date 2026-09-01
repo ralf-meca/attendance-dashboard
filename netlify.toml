@@ -1,0 +1,17 @@
+# The chweb CRM serves only its own frontend, so it sends no CORS headers and a
+# browser on this origin cannot call it directly. Proxy /api at the Netlify edge
+# instead: the request is made server-side, where CORS does not apply. This
+# mirrors the dev-server proxy in vite.config.ts, so the same relative /api
+# paths work in both environments.
+[[redirects]]
+  from = "/api/*"
+  to = "https://crm-chweb.tailb5010e.ts.net/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback for vue-router history mode. Must stay last: rules are matched in
+# order, and this one matches everything.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
