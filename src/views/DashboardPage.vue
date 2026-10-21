@@ -103,19 +103,7 @@ import TabPanel from 'primevue/tabpanel'
 const authStore = useAuthStore()
 const userContact = computed(() => authStore.userContact)
 
-const userRates = computed(() => {
-  switch (userContact?.value?.email) {
-    case 'devis.kapaj@chweb.it':
-      return 50
-    case 'francesko.dhima@chweb.it':
-      return 100
-    case 'ralf.meca@chweb.it':
-      return 75
-
-    default:
-      return 100
-  }
-})
+const DEFAULT_DAY_RATE = 90
 
 // Attendance state
 const attendanceResponse = ref<AttendanceRecord[] | null>(null)
@@ -190,8 +178,8 @@ const hoursWorkedThisMonth = computed(() => {
   }, 0)
 })
 
-const dayRates = [20, 30, 40, 50, 60, 75, 80, 100]
-const selectedRate = ref<number>(userRates.value)
+const dayRates = [20, 30, 40, 50, 60, 75, 80, 90, 100]
+const selectedRate = ref<number>(DEFAULT_DAY_RATE)
 
 const totalAmount = computed(() => {
   const amount = (hoursWorkedThisMonth.value / 8) * (selectedRate?.value ?? 0)
